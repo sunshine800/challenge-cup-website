@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html{height:100%}    
+    body{height:100%;margin:0px;padding:0px}    
+    #container{height:100%}    
+  </style>
+</head>
+
+<script src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=webgl&ak=J9dFb5IOhxkhkV2IaxikU1YggDoDcskw"></script>
+<body>
+  <!-- 创建地图容器元素 -->
+  <div id="container"></div> 
+  
+</body>
+<script>
+  // 创建地图实例=> 参数可以是元素id也可以是元素对象。
+  var map = new BMapGL.Map("container");
+  // 设置中心点坐标(经纬度)=>zhonglou坐标
+  var point = new BMapGL.Point(108.947001, 34.259458);
+  // 地图初始化，同时设置地图展示级别
+  map.centerAndZoom(point, 15); 
+  map.enableScrollWheelZoom(true);  
+  var myIcon = new BMapGL.Icon("C:\Users\Lenovo\Desktop\21.jpeg", new BMapGL.Size(23, 25))
+  var marker = new BMapGL.Marker(point, { icon: myIcon });
+  map.addOverlay(marker);
+  var scaleCtrl = new BMapGL.ScaleControl();  // 添加比例尺控件
+map.addControl(scaleCtrl);
+var zoomCtrl = new BMapGL.ZoomControl();  // 添加缩放控件
+map.addControl(zoomCtrl);
+var cityCtrl = new BMapGL.CityListControl();  // 添加城市列表控件
+map.addControl(cityCtrl);
+  
+</script>
+</html>
+

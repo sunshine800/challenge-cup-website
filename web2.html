@@ -1,0 +1,136 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html { height: 100%; }
+    body { height: 100%; margin: 0; padding: 0; }
+    #container { height: 100%; }
+    #uploadedImage { display: none; width: 100px; height: auto; }
+  </style>
+</head>
+<body>
+  <div id="container"></div>
+  <script src="http://api.map.baidu.com/api?type=webgl&v=1.0&ak=J9dFb5IOhxkhkV2IaxikU1YggDoDcskw"></script>
+  <script>
+    var map = new BMapGL.Map("container");
+    var point = new BMapGL.Point(108.947001, 34.259458);
+    map.centerAndZoom(point, 15);
+    map.enableScrollWheelZoom(true);
+
+    // 添加控件
+    map.addControl(new BMapGL.ScaleControl());
+    map.addControl(new BMapGL.ZoomControl());
+    map.addControl(new BMapGL.CityListControl());
+
+    // 监听地图点击事件
+    map.addEventListener("click", function(e) {
+      var clickedPoint = e.latlng;
+      var content = `
+        <div>
+          <h4>添加标记</h4>
+          <textarea id="infoText" rows="3" cols="20" placeholder="输入标记信息"></textarea><br>
+          <input type="file" id="fileInput" accept="image/*"/><br>
+          <button id="saveBtn">保存</button>
+          <img id="uploadedImage" src="" alt="Uploaded Image" style="display:none;"/>
+        </div>`;
+
+      var infoWindow = new BMapGL.InfoWindow(content);
+      map.openInfoWindow(infoWindow, clickedPoint);
+
+      // 保存按钮事件
+      document.getElementById("saveBtn").onclick = function() {
+        var text = document.getElementById("infoText").value;
+        var fileInput = document.getElementById("fileInput");
+        var imgSrc = "";
+
+        if (fileInput.files && fileInput.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(event) {
+            imgSrc = event.target.result;
+            addMarker(clickedPoint, text, imgSrc);
+          };
+          reader.readAsDataURL(fileInput.files[0]);
+        } else {
+          addMarker(clickedPoint, text);
+        }
+      };
+    });
+
+    function addMarker(point, text, imgSrc) {
+      var myIcon = new BMapGL.Icon("C:\\Users\\Lenovo\\Desktop\\21.jpeg", new BMapGL.Size(23, 25));
+      var marker = new BMapGL.Marker(point, { icon: myIcon });
+      map.addOverlay(marker);
+
+      // 如果有文本和图片，更新信息窗口内容
+      var newContent = `
+        <div>
+          <h4>标记信息</h4>
+          <p>${text}</p>
+          ${imgSrc ? `<img src="${imgSrc}" style="width:100px; height:auto;"/>` : ''}
+          <br>
+          <button id="editBtn">编辑</button>
+          <button id="deleteMarkerBtn">删除标记</button>
+        </div>`;
+      var newInfoWindow = new BMapGL.InfoWindow(newContent);
+
+      marker.addEventListener("click", function() {
+        map.openInfoWindow(newInfoWindow, point);
+      });
+
+      // 编辑按钮事件
+      newInfoWindow.addEventListener("click", function(event) {
+        if (event.target.id === "editBtn") {
+          editMarker(marker, text, imgSrc);
+        }
+      });
+
+      // 删除按钮事件
+      newInfoWindow.addEventListener("click", function(event) {
+        if (event.target.id === "deleteMarkerBtn") {
+          map.removeOverlay(marker);
+          newInfoWindow.close();
+        }
+      });
+    }
+
+    function editMarker(marker, currentText, currentImgSrc) {
+      var editContent = `
+        <div>
+          <h4>编辑标记信息</h4>
+          <textarea id="editText" rows="3" cols="20">${currentText}</textarea><br>
+          <input type="file" id="editFileInput" accept="image/*"/><br>
+          <button id="updateBtn">更新</button>
+          <img id="editUploadedImage" src="${currentImgSrc}" alt="Uploaded Image" style="display:${currentImgSrc ? 'block' : 'none'}; width:100px; height:auto;"/>
+        </div>`;
+
+      var editInfoWindow = new BMapGL.InfoWindow(editContent);
+      map.openInfoWindow(editInfoWindow, marker.getPosition());
+
+      document.getElementById("updateBtn").onclick = function() {
+        var newText = document.getElementById("editText").value;
+        var fileInput = document.getElementById("editFileInput");
+        var newImgSrc = "";
+
+        if (fileInput.files && fileInput.files[0]) {
+          var reader = new FileReader();
+          reader.onload = function(event) {
+            newImgSrc = event.target.result;
+            updateMarker(marker, newText, newImgSrc);
+          };
+          reader.readAsDataURL(fileInput.files[0]);
+        } else {
+          updateMarker(marker, newText, currentImgSrc);
+        }
+      };
+    }
+
+    function updateMarker(marker, text, imgSrc) {
+      marker.setMap(null); // 移除旧标记
+      addMarker(marker.getPosition(), text, imgSrc); // 添加新标记
+    }
+  </script>
+</body>
+</html>
